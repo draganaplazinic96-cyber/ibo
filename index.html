@@ -4,7 +4,7 @@
 <style>
 :root{--paper:#eee4cc;--paper2:#e4d4b4;--ink:#202823;--petrol:#173f43;--petrol2:#24595b;--red:#8d2e2b;--muted:#766d5c;--line:#b8a889}
 *{box-sizing:border-box} body{margin:0;background:#172d2e;color:var(--ink);font-family:Georgia,"Times New Roman",serif}
-.page{max-width:980px;margin:30px auto;background:var(--paper);min-height:100vh;box-shadow:0 18px 55px #081516;padding:34px;position:relative;overflow:hidden}
+.page{max-width:980px;margin:30px auto;background:var(--paper);min-height:100vh;box-shadow:0 18px 55px #081516;padding:34px;position:relative;overflow:clip}
 .page:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;background:repeating-linear-gradient(0deg,transparent 0 27px,#8e806620 28px)}
 header{position:relative;border:2px solid var(--petrol);padding:25px 28px 21px;margin-bottom:22px;background:#f3ead7}
 .hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(320px,1.25fr);min-height:285px;border:2px solid var(--petrol);margin-bottom:22px;background:#f3ead7;position:relative;overflow:hidden}
@@ -39,8 +39,21 @@ h1{font-size:clamp(34px,5vw,59px);line-height:.92;margin:0 0 18px;color:var(--pe
 .redcheck:checked{background:var(--red);box-shadow:inset 0 0 0 4px #f4e8d6}
 .redrow.rdone .q{text-decoration:line-through;color:#90746d}
 .actions{text-align:right;margin-top:18px}.reset{border:1px solid var(--muted);background:transparent;color:var(--muted);padding:8px 11px;font:700 10px Arial,sans-serif;letter-spacing:.08em;cursor:pointer}
+.clock{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;background:#0f2628;color:#f5eedf;padding:12px 18px 14px;margin:0 0 20px;border-bottom:3px solid var(--red);box-shadow:0 8px 20px #0007}
+.clock .lab{font:800 10px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#d7c89e}
+.clock .big{font:800 42px Arial,sans-serif;font-variant-numeric:tabular-nums;line-height:1.05}
+.clock.warn .big{color:#f0a89e}
+.clock .side{text-align:right}.clock .mid{font:800 20px Arial,sans-serif;font-variant-numeric:tabular-nums}
+.clock .pace{font:700 12px Arial,sans-serif;color:#f0c0b8;margin-top:3px}
+.cbar{grid-column:1/-1;height:4px;background:#ffffff25}.cfill{height:100%;width:0;background:#d7c89e}
+.slot{display:block;margin-top:2px;font:700 10px Arial,sans-serif;letter-spacing:.06em;color:var(--muted)}
+.row.now{background:#f7e8c4;outline:2px solid var(--red);outline-offset:-2px}
+.row.now .slot{color:var(--red)}
+.row.late .num{color:var(--red)}
+@media(max-width:650px){.clock{padding:10px 12px 12px}.clock .big{font-size:32px}.clock .mid{font-size:16px}}
 @media(max-width:650px){.page{margin:0;padding:18px 14px}.hero{grid-template-columns:1fr;min-height:0}.hero-copy{padding:24px 20px 18px}.map-panel{min-height:210px;background-position:center}.dashboard{grid-template-columns:1fr}.redcount{text-align:left}.row{grid-template-columns:28px 1fr 38px}.q{font-size:15px}}
 </style></head><body><main class="page">
+<div class="clock" id="clock"><div><div class="lab" id="cl"></div><div class="big" id="cb"></div></div><div class="side"><div class="lab" id="cs1"></div><div class="mid" id="cs2"></div><div class="pace" id="cp"></div></div><div class="cbar"><div class="cfill" id="cf"></div></div></div>
 <header class="hero">
   <div class="hero-copy">
     <h1>Istorija<br>balkanskih odnosa</h1>
@@ -48,12 +61,17 @@ h1{font-size:clamp(34px,5vw,59px);line-height:.92;margin:0 0 18px;color:var(--pe
   </div>
   <div class="map-panel"></div>
 </header>
-<div class="dashboard"><div><div class="progressText" id="pt">0 / 31 završeno</div><div class="bar"><div class="fill" id="pf"></div></div></div><div class="redcount" id="rc">🚩 0 u Crvenoj zoni</div></div>
+<div class="dashboard"><div><div class="progressText" id="pt">0 / 39 završeno</div><div class="bar"><div class="fill" id="pf"></div></div></div><div class="redcount" id="rc">🚩 0 u Crvenoj zoni</div></div>
 <div id="main"></div>
 <section class="redzone"><div class="redhead"><h2>Crvena zona</h2><small>🚩 KRIZNE TAČKE · PONOVI POSEBNO</small></div><div id="red"></div></section>
 <div class="actions"><button class="reset" id="reset">RESETUJ NAPREDAK</button></div>
 </main><script>
-const Q=["Sanstefanski mir i stvaranje bugarske države (1878–1908)", "Velika istočna kriza i Berlinski kongres", "Nastanak i razvoj hrvatskog nacionalnog pitanja u 19. veku", "Prizrenska liga i stvaranje albanskog nacionalnog pokreta (1878–1913)", "Makedonsko pitanje u balkanskim i evropskim odnosima", "Ideje o ujedinjenju južnoslovenskih naroda u 19. veku", "Crna Gora u vreme Nikole Petrovića", "Srbija pod vlašću poslednjih Obrenovića", "Mladoturska revolucija i stvaranje turske nacije", "Majski prevrat i vlast Petra I (1903–1912)", "Aneksiona kriza i odnosi AU i Srbije", "Balkanski ratovi i njihove posledice", "Prvi svetski rat na Balkanu od 1914. do kraja 1915. godine", "Prvi svetski rat na Balkanu od 1916. do 1918. godine", "Versajska mirovna konferencija i geopolitičke promene na Balkanu posle Prvog svetskog rata", "Kraljevina SHS/Jugoslavija između dva svetska rata", "Kemal Ataturk i turska država između dva svetska rata", "Balkan u politici sila tokom Drugog svetskog rata", "Grčka pod Venizelosom i Metaksisom", "Albanija pod Ahmedom Zoguom", "Britanija i pokreti otpora na Balkanu tokom Drugog svetskog rata", "Rumunija u međuratnom periodu", "Bugarska u međuratnom periodu", "Balkanska multilateralna saradnja između dva svetska rata", "Francuski i italijanski sistem saveza na Balkanu između dva svetska rata i Mala antanta", "Uticaj fašizma i nacizma na Balkanu tridesetih godina XX veka", "Prodor Musolinija i Hitlera na Balkan 1939–1941.", "Pokreti otpora na Balkanu tokom Drugog svetskog rata", "Uzroci i posledice sporazuma Staljina i Čerčila o podeli interesnih sfera na Balkanu posle Drugog svetskog rata", "Mirovni sporazumi i početak hladnoratovskih podela interesnih sfera na Balkanu nakon Drugog svetskog rata", "Građanski rat u Grčkoj 1945–1949."], S=[["I · ISTOČNA KRIZA I NACIONALNA PITANJA", 0, 5], ["II · BALKANSKE DRŽAVE I PUT KA VELIKOM SUKOBU", 5, 12], ["III · PRVI SVETSKI RAT I NOVI BALKANSKI POREDAK", 12, 17], ["IV · BALKAN IZMEĐU DVA SVETSKA RATA", 17, 25], ["V · FAŠIZAM, NACIZAM I DRUGI SVETSKI RAT", 25, 28], ["VI · POSLERATNA PODELA I POČETAK HLADNOG RATA", 28, 31]], KEY="ibo_review_v1";
+const Q=["San Stefanski mir i nastanak bugarske države", "„Velika istočna kriza“ i Berlinski kongres", "Nastanak i razvoj hrvatskog nacionalnog pitanja u XIX veku", "Prizrenska liga i stvaranje albanskog nacionalnog pokreta (1878–1913)", "Bosna i Hercegovina i politika evropskih sila i suseda (1875–1878)", "„Makedonsko pitanje“ u balkanskim i evropskim odnosima", "Ideje o ujedinjenju južnoslovenskih naroda u XIX veku", "Crna Gora u vreme vladavine Nikole Petrovića", "Srbija pod vlašću poslednjih Obrenovića", "Grčka od 1878. do 1900. godine", "Rumunija od 1878. do 1900. godine", "Mladoturska revolucija i stvaranje turske nacije", "Majski prevrat i vlast kralja Petra Karađorđevića u Srbiji", "Aneksiona kriza i odnosi Austrougarske i Srbije", "Bugarska pod kraljem Ferdinandom početkom 20. veka", "Rumunija pod kraljem Karolom početkom 20. veka", "Grčka pod kraljem Đorđem i uspon Venizelosa početkom 20. veka", "Balkanski ratovi i njihove posledice", "Izbijanje Prvog svetskog rata i ratne operacije na Balkanu 1914–1915.", "Ulazak Bugarske i Rumunije u Prvi svetski rat i dinamika operacija 1915–1917.", "Ulazak Grčke u Prvi svetski rat i proboj Solunskog fronta 1917–1918.", "Versajska mirovna konferencija i geopolitičke promene na Balkanu posle Prvog svetskog rata", "Kemal Ataturk i nastanak turske nacionalne države", "Grčko-turski rat 1920–1923.", "Od demokratija ka diktaturi — politički sistemi balkanskih država nakon Prvog svetskog rata", "Balkanske konferencije 1930–1933.", "Balkanski savez 1934–1940.", "Geneza nastanka i učinci Male antante", "Francuski i italijanski sistemi saveza na Balkanu između dva svetska rata", "Prodor Musolinija i Hitlera na Balkan 1939–1941.", "Satelitska Rumunija i satelitska Bugarska tokom Drugog svetskog rata", "Okupirana Jugoslavija i okupirana Albanija tokom Drugog svetskog rata", "Okupirana Grčka tokom Drugog svetskog rata i uvod u građanski rat 1944–1945.", "Mirovni sporazumi i početak hladnoratovskih podela interesnih sfera na Balkanu nakon Drugog svetskog rata", "Prosovjetska spoljna politika nove Jugoslavije 1944–1948.", "Izgradnja komunizma u zemljama Jugoistočne Evrope nakon Drugog svetskog rata", "Hladni rat u Jugoistočnoj Evropi", "Balkanski pakt Jugoslavije, Grčke i Turske i približavanje Zapadu tokom 1950-ih", "Jugoslavija i politika nesvrstanosti od 1960-ih do 1980-ih"], S=[["I · ISTOČNA KRIZA I NACIONALNA PITANJA", 0, 7], ["II · BALKANSKE DRŽAVE I PUT KA VELIKOM SUKOBU", 7, 18], ["III · PRVI SVETSKI RAT I NOVI BALKANSKI POREDAK", 18, 24], ["IV · BALKAN IZMEĐU DVA SVETSKA RATA", 24, 29], ["V · SILE OSOVINE I DRUGI SVETSKI RAT", 29, 33], ["VI · POSLERATNA PODELA I HLADNI RAT", 33, 39]], KEY="ibo_review_v2";
+const T0=new Date(2026,8,21,2,0,0).getTime(),T1=new Date(2026,8,21,7,30,0).getTime(),SL=(T1-T0)/Q.length;
+const pad=n=>String(n).padStart(2,"0");
+const hm=t=>{const d=new Date(t);return pad(d.getHours())+":"+pad(d.getMinutes())};
+const hms=s=>{s=Math.max(0,Math.ceil(s));return pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60)};
+const mss=s=>{s=Math.max(0,Math.ceil(s));return pad(Math.floor(s/60))+":"+pad(s%60)};
 let state={done:{},red:{},redDone:{}};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
@@ -63,8 +81,8 @@ function render(){
   const sec=document.createElement("section");sec.className="section";
   sec.innerHTML=`<div class="section-title">${s[0]}</div>`;
   for(let i=s[1];i<s[2];i++){
-   const r=document.createElement("div");r.className="row"+(state.done[i]?" done":"");
-   r.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><label class="q"><input class="check" type="checkbox" ${state.done[i]?"checked":""} data-d="${i}"> ${Q[i]}</label><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button>`;
+   const r=document.createElement("div");r.className="row"+(state.done[i]?" done":"");r.dataset.i=i;
+   r.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><label class="q"><input class="check" type="checkbox" ${state.done[i]?"checked":""} data-d="${i}"> ${Q[i]}<span class="slot">${hm(Math.round(T0+i*SL))}–${hm(Math.round(T0+(i+1)*SL))}</span></label><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button>`;
    sec.appendChild(r)
   }
   main.appendChild(sec);
@@ -81,7 +99,30 @@ function render(){
  document.getElementById("pt").textContent=`${n} / ${Q.length} završeno`;
  document.getElementById("pf").style.width=(n/Q.length*100)+"%";
  document.getElementById("rc").textContent=`🚩 ${ids.length} u Crvenoj zoni`;
+ tick();
 }
 document.getElementById("reset").onclick=()=>{if(confirm("Resetovati sav IBO napredak?")){state={done:{},red:{},redDone:{}};save();render()}};
-render();
+function tick(){
+ const now=Date.now(),$=id=>document.getElementById(id);
+ const n=Object.keys(state.done).filter(i=>state.done[i]).length;
+ let idx;
+ if(now<T0){idx=-1;
+  $("cl").textContent="Početak za";$("cb").textContent=hms((T0-now)/1000);
+  $("cs1").textContent="Ukupno";$("cs2").textContent=hms((T1-T0)/1000);
+  $("cp").textContent=Q.length+" pitanja · "+mss(SL/1000).replace(/^0/,"")+" po pitanju";
+  $("cf").style.width="0%";$("clock").classList.remove("warn");
+ }else if(now>=T1){idx=Q.length;
+  $("cl").textContent="Vreme isteklo";$("cb").textContent="00:00";
+  $("cs1").textContent="Urađeno";$("cs2").textContent=n+" / "+Q.length;
+  $("cp").textContent="";$("cf").style.width="100%";$("clock").classList.remove("warn");
+ }else{idx=Math.floor((now-T0)/SL);
+  const rem=(T0+(idx+1)*SL-now)/1000;
+  $("cl").textContent="Pitanje "+pad(idx+1)+" / "+Q.length;$("cb").textContent=mss(rem);
+  $("cs1").textContent="Do "+hm(T1);$("cs2").textContent=hms((T1-now)/1000);
+  const d=n-idx;$("cp").textContent=d>0?"Ispred +"+d:d<0?"Kasniš "+(-d):"Na planu";
+  $("cf").style.width=(100-rem/(SL/1000)*100)+"%";$("clock").classList.toggle("warn",rem<60);
+ }
+ document.querySelectorAll(".row").forEach(r=>{const i=+r.dataset.i;r.classList.toggle("now",i===idx);r.classList.toggle("late",i<idx&&!state.done[i])});
+}
+render();setInterval(tick,1000);
 </script></body></html>
