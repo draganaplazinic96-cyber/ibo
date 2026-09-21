@@ -79,8 +79,19 @@ h1{font-size:clamp(34px,5vw,59px);line-height:.92;margin:0 0 18px;color:var(--pe
 .rzinfo{font:700 11px Arial,sans-serif;color:var(--red);padding:6px 3px 2px}
 .redrow .slot{display:block;margin-top:2px}
 @media(max-width:650px){.row{grid-template-columns:28px 1fr auto}.ctl{gap:8px}.stats .v{font-size:16px}.stats .k{font-size:8px}}
+.flag{width:40px;height:36px}
+.ctl{display:flex;flex-wrap:wrap;align-items:center;align-self:auto;gap:8px;margin-top:9px}
+.pill{appearance:none;display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 16px 8px 10px;border:1.5px solid var(--petrol);background:#f7efdd;color:var(--petrol);font:800 12px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;user-select:none}
+.pill.on{background:var(--petrol);color:#f5eedf}
+.pill:disabled{opacity:.5;cursor:default}
+.pill .check{width:18px;height:18px;margin:0;flex:none}
+.pill.on .check{background:#f5eedf;border-color:#f5eedf;box-shadow:inset 0 0 0 4px var(--petrol)}
+.pill .dot{width:18px;height:18px;border:1.5px solid var(--petrol);border-radius:50%;flex:none;position:relative}
+.pill .dot:before{content:"";position:absolute;left:5px;top:3px;border-left:7px solid var(--petrol);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.pill.on .dot{background:#f5eedf;border-color:#f5eedf}
+.pill.on .dot:before{border-left-color:var(--petrol)}
 </style></head><body><main class="page">
-<div class="clock" id="clock"><div><div class="lab" id="cl"></div><div class="big" id="cb"></div></div><div class="side"><div class="lab" id="cs1"></div><div class="mid" id="cs2"></div><div class="pace" id="cp"></div></div><div class="cbar"><div class="cfill" id="cf"></div></div></div>
+<div class="clock" id="clock"><div><div class="lab" id="cl"></div><div class="big" id="cb"></div></div><div class="side"><div class="lab">Sada · <span id="cn"></span></div><div class="lab" id="cs1" style="margin-top:6px"></div><div class="mid" id="cs2"></div><div class="pace" id="cp"></div></div><div class="cbar"><div class="cfill" id="cf"></div></div></div>
 <header class="hero">
   <div class="hero-copy">
     <h1>Istorija<br>balkanskih odnosa</h1>
@@ -90,7 +101,7 @@ h1{font-size:clamp(34px,5vw,59px);line-height:.92;margin:0 0 18px;color:var(--pe
   <div class="map-panel"></div>
 </header>
 <div class="dashboard"><div><div class="progressText" id="pt">0 / 39 završeno</div><div class="bar"><div class="fill" id="pf"></div></div></div><div class="redcount" id="rc">🚩 0 u Crvenoj zoni</div><div class="stats" id="stats"></div></div>
-<div class="legend">▶ počela · ✓ gotovo · 🚩 crvena zona &nbsp;—&nbsp; vreme se upisuje u trenutku kad klikneš</div>
+<div class="legend">Vreme se upisuje u trenutku kad klikneš „Počela“ i „Završila“ · 🚩 = crvena zona</div>
 <div id="main"></div>
 <section class="redzone"><div class="redhead"><h2>Crvena zona</h2><small id="rzt"></small></div><div class="rzinfo" id="rzi"></div><div id="red"></div></section>
 <div class="actions"><button class="reset" id="reset">RESETUJ NAPREDAK</button></div>
@@ -141,7 +152,7 @@ function render(){
    if(st&&en){const d=(en-st)/1000,df=SL/1000-d;t+=`<span class="act">Potrošeno ${fdur(d)}</span><span class="${df>=0?"plus":"minus"}">${fsgn(df)}</span>`}
    else if(st)t+=`<span class="live" data-live="${i}"></span>`;
    const r=document.createElement("div");r.className="row"+(dn?" done":"");r.dataset.i=i;
-   r.innerHTML=`<div class="num">${pad(i+1)}</div><div class="qbody"><div class="q">${Q[i]}</div><div class="times">${t}</div></div><div class="ctl"><button class="startbtn ${st?"on":""}" data-s="${i}" ${dn?"disabled":""} aria-label="Počela sam pitanje ${i+1}" title="Počela sam"></button><input class="check" type="checkbox" ${dn?"checked":""} data-d="${i}" aria-label="Završila sam pitanje ${i+1}" title="Gotovo"><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button></div>`;
+   r.innerHTML=`<div class="num">${pad(i+1)}</div><div class="qbody"><div class="q">${Q[i]}</div><div class="times">${t}</div><div class="ctl"><button type="button" class="pill${st?" on":""}" data-s="${i}" ${dn?"disabled":""}><span class="dot"></span>Počela</button><label class="pill${dn?" on":""}"><input class="check" type="checkbox" ${dn?"checked":""} data-d="${i}">Završila</label></div></div><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button>`;
    sec.appendChild(r)
   }
   main.appendChild(sec);
@@ -172,20 +183,25 @@ function render(){
  $("pf").style.width=(n/Q.length*100)+"%";
  $("rc").textContent=`🚩 ${ids.length} u Crvenoj zoni`;
 
- // stvarno potrošeno na urađena pitanja (samo ona koja imaju i početak i kraj)
- let m=0,sum=0;
- Object.keys(state.done).forEach(k=>{if(state.done[k]&&state.start[k]&&state.end[k]){m++;sum+=(state.end[k]-state.start[k])/1000}});
- const plan=m*SL/1000,df=plan-sum;
- $("stats").innerHTML=
-  `<div><div class="k">Stvarno potrošeno</div><div class="v">${m?fdur(sum):"—"}</div></div>`+
-  `<div><div class="k">Po planu za ta pitanja</div><div class="v">${m?fdur(plan):"—"}</div></div>`+
-  `<div><div class="k">Razlika</div><div class="v ${m?(df>=0?"plus":"minus"):""}">${m?(df>=0?"Plus ":"Minus ")+fdur(df):"—"}</div></div>`;
  tick();
 }
 $("reset").onclick=()=>{if(confirm("Resetovati sav IBO napredak?")){state={done:{},red:{},redDone:{},start:{},end:{},auto:{}};save();render()}};
 
+function paintStats(now,cur){
+ let m=0,sum=0;
+ Object.keys(state.done).forEach(k=>{if(state.done[k]&&state.start[k]&&state.end[k]){m++;sum+=(state.end[k]-state.start[k])/1000}});
+ let plan=m*SL/1000,live=false;
+ if(cur&&cur.run&&state.start[cur.i]){const el=Math.max(0,(now-state.start[cur.i])/1000);sum+=el;plan+=Math.min(el,SL/1000);live=true}
+ const any=m||live,df=plan-sum;
+ $("stats").innerHTML=
+  `<div><div class="k">Stvarno potrošeno${live?" (+ u toku)":""}</div><div class="v">${any?fdur(sum):"—"}</div></div>`+
+  `<div><div class="k">Po planu za ta pitanja</div><div class="v">${any?fdur(plan):"—"}</div></div>`+
+  `<div><div class="k">Razlika</div><div class="v ${any?(df>=0?"plus":"minus"):""}">${any?(df>=0?"Plus ":"Minus ")+fdur(df):"—"}</div></div>`;
+}
 function tick(){
- const now=Date.now(),n=nDone(),clk=$("clock"),pc=$("cp"),cur=curQ();
+ const now=Date.now(),n=nDone(),clk=$("clock"),pc=$("cp"),cur=curQ(),D=new Date(now);
+ $("cn").textContent=pad(D.getHours())+":"+pad(D.getMinutes())+":"+pad(D.getSeconds());
+ paintStats(now,cur);
  const ph=now<T0?0:now<T1?1:now<T2?2:3;
  clk.classList.remove("warn");clk.classList.toggle("redmode",ph===2);pc.className="pace";
  if(ph===0){
@@ -201,7 +217,7 @@ function tick(){
    $("cf").style.width=Math.min(100,el/SL*100)+"%";
    clk.classList.toggle("warn",rem<60);
   }else if(cur){
-   $("cl").textContent="Pitanje "+pad(cur.i+1)+" / "+Q.length+" · pritisni ▶ kad kreneš";
+   $("cl").textContent="Pitanje "+pad(cur.i+1)+" / "+Q.length+" · pritisni „Počela“ kad kreneš";
    $("cb").textContent=mss(SL/1000);$("cf").style.width="0%";
   }else{
    $("cl").textContent="Sva pitanja urađena";$("cb").textContent=n+" / "+Q.length;$("cf").style.width="100%";
@@ -217,7 +233,7 @@ function tick(){
   pc.textContent=ids.length?"🚩 "+rd+" / "+ids.length+" ponovljeno":"Nema označenih 🚩 pitanja";
   $("cf").style.width=((now-T1)/(T2-T1)*100)+"%";clk.classList.toggle("warn",rem<60);
  }else{
-  $("cl").textContent="Vreme je · idemo";$("cb").textContent="00:00";
+  $("cl").textContent="Vreme isteklo";$("cb").textContent="00:00";
   $("cs1").textContent="Urađeno";$("cs2").textContent=n+" / "+Q.length;
   pc.textContent="Ispit u 09:00";$("cf").style.width="100%";
  }
