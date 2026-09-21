@@ -52,77 +52,182 @@ h1{font-size:clamp(34px,5vw,59px);line-height:.92;margin:0 0 18px;color:var(--pe
 .row.late .num{color:var(--red)}
 @media(max-width:650px){.clock{padding:10px 12px 12px}.clock .big{font-size:32px}.clock .mid{font-size:16px}}
 @media(max-width:650px){.page{margin:0;padding:18px 14px}.hero{grid-template-columns:1fr;min-height:0}.hero-copy{padding:24px 20px 18px}.map-panel{min-height:210px;background-position:center}.dashboard{grid-template-columns:1fr}.redcount{text-align:left}.row{grid-template-columns:28px 1fr 38px}.q{font-size:15px}}
+
+/* ===== praćenje vremena ===== */
+.plan-line{margin-top:10px;font:800 11px Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--petrol)}
+.legend{margin:-8px 0 14px;font:700 11px Arial,sans-serif;letter-spacing:.04em;color:var(--muted)}
+.stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border-top:1px solid #ffffff25;padding-top:12px}
+.stats .k{font:800 9px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#d7c89e}
+.stats .v{font:800 20px Arial,sans-serif;font-variant-numeric:tabular-nums;margin-top:3px}
+.stats .v.plus{color:#9ad3a2}.stats .v.minus{color:#f0a89e}
+.row{grid-template-columns:38px 1fr auto}
+.qbody .q,.redrow .q{cursor:default}
+.times{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:4px;font:700 11px Arial,sans-serif;font-variant-numeric:tabular-nums;color:var(--muted)}
+.times .slot{display:inline;margin:0;font-size:11px}
+.times .act{color:var(--petrol)}
+.times .plus{color:#2e6b3d}.times .minus{color:var(--red)}
+.times .live{font-weight:800}
+.ctl{display:flex;align-items:center;gap:10px;align-self:center}
+.check{width:24px;height:24px;margin:0}
+.check:checked{box-shadow:inset 0 0 0 5px #f7efdd}
+.startbtn{appearance:none;width:24px;height:24px;padding:0;border:1.5px solid var(--petrol);border-radius:50%;background:#f7efdd;position:relative;cursor:pointer;flex:none}
+.startbtn:before{content:"";position:absolute;left:8px;top:5px;border-left:8px solid var(--petrol);border-top:6px solid transparent;border-bottom:6px solid transparent}
+.startbtn.on{background:var(--petrol)}.startbtn.on:before{border-left-color:#f7efdd}
+.startbtn:disabled{opacity:.4;cursor:default}
+.clock .pace.plus{color:#9ad3a2}.clock .pace.minus{color:#f0a89e}
+.clock.redmode{background:#3a1512;border-bottom-color:#d7c89e}
+.rzinfo{font:700 11px Arial,sans-serif;color:var(--red);padding:6px 3px 2px}
+.redrow .slot{display:block;margin-top:2px}
+@media(max-width:650px){.row{grid-template-columns:28px 1fr auto}.ctl{gap:8px}.stats .v{font-size:16px}.stats .k{font-size:8px}}
 </style></head><body><main class="page">
 <div class="clock" id="clock"><div><div class="lab" id="cl"></div><div class="big" id="cb"></div></div><div class="side"><div class="lab" id="cs1"></div><div class="mid" id="cs2"></div><div class="pace" id="cp"></div></div><div class="cbar"><div class="cfill" id="cf"></div></div></div>
 <header class="hero">
   <div class="hero-copy">
     <h1>Istorija<br>balkanskih odnosa</h1>
     <div class="exam-date">Ispit · 21. septembar · 09:00</div>
+    <div class="plan-line">Učenje 02:00–07:00 · Crvena zona 07:00–07:30</div>
   </div>
   <div class="map-panel"></div>
 </header>
-<div class="dashboard"><div><div class="progressText" id="pt">0 / 39 završeno</div><div class="bar"><div class="fill" id="pf"></div></div></div><div class="redcount" id="rc">🚩 0 u Crvenoj zoni</div></div>
+<div class="dashboard"><div><div class="progressText" id="pt">0 / 39 završeno</div><div class="bar"><div class="fill" id="pf"></div></div></div><div class="redcount" id="rc">🚩 0 u Crvenoj zoni</div><div class="stats" id="stats"></div></div>
+<div class="legend">▶ počela · ✓ gotovo · 🚩 crvena zona &nbsp;—&nbsp; vreme se upisuje u trenutku kad klikneš</div>
 <div id="main"></div>
-<section class="redzone"><div class="redhead"><h2>Crvena zona</h2><small>🚩 KRIZNE TAČKE · PONOVI POSEBNO</small></div><div id="red"></div></section>
+<section class="redzone"><div class="redhead"><h2>Crvena zona</h2><small id="rzt"></small></div><div class="rzinfo" id="rzi"></div><div id="red"></div></section>
 <div class="actions"><button class="reset" id="reset">RESETUJ NAPREDAK</button></div>
 </main><script>
 const Q=["San Stefanski mir i nastanak bugarske države", "„Velika istočna kriza“ i Berlinski kongres", "Nastanak i razvoj hrvatskog nacionalnog pitanja u XIX veku", "Prizrenska liga i stvaranje albanskog nacionalnog pokreta (1878–1913)", "Bosna i Hercegovina i politika evropskih sila i suseda (1875–1878)", "„Makedonsko pitanje“ u balkanskim i evropskim odnosima", "Ideje o ujedinjenju južnoslovenskih naroda u XIX veku", "Crna Gora u vreme vladavine Nikole Petrovića", "Srbija pod vlašću poslednjih Obrenovića", "Grčka od 1878. do 1900. godine", "Rumunija od 1878. do 1900. godine", "Mladoturska revolucija i stvaranje turske nacije", "Majski prevrat i vlast kralja Petra Karađorđevića u Srbiji", "Aneksiona kriza i odnosi Austrougarske i Srbije", "Bugarska pod kraljem Ferdinandom početkom 20. veka", "Rumunija pod kraljem Karolom početkom 20. veka", "Grčka pod kraljem Đorđem i uspon Venizelosa početkom 20. veka", "Balkanski ratovi i njihove posledice", "Izbijanje Prvog svetskog rata i ratne operacije na Balkanu 1914–1915.", "Ulazak Bugarske i Rumunije u Prvi svetski rat i dinamika operacija 1915–1917.", "Ulazak Grčke u Prvi svetski rat i proboj Solunskog fronta 1917–1918.", "Versajska mirovna konferencija i geopolitičke promene na Balkanu posle Prvog svetskog rata", "Kemal Ataturk i nastanak turske nacionalne države", "Grčko-turski rat 1920–1923.", "Od demokratija ka diktaturi — politički sistemi balkanskih država nakon Prvog svetskog rata", "Balkanske konferencije 1930–1933.", "Balkanski savez 1934–1940.", "Geneza nastanka i učinci Male antante", "Francuski i italijanski sistemi saveza na Balkanu između dva svetska rata", "Prodor Musolinija i Hitlera na Balkan 1939–1941.", "Satelitska Rumunija i satelitska Bugarska tokom Drugog svetskog rata", "Okupirana Jugoslavija i okupirana Albanija tokom Drugog svetskog rata", "Okupirana Grčka tokom Drugog svetskog rata i uvod u građanski rat 1944–1945.", "Mirovni sporazumi i početak hladnoratovskih podela interesnih sfera na Balkanu nakon Drugog svetskog rata", "Prosovjetska spoljna politika nove Jugoslavije 1944–1948.", "Izgradnja komunizma u zemljama Jugoistočne Evrope nakon Drugog svetskog rata", "Hladni rat u Jugoistočnoj Evropi", "Balkanski pakt Jugoslavije, Grčke i Turske i približavanje Zapadu tokom 1950-ih", "Jugoslavija i politika nesvrstanosti od 1960-ih do 1980-ih"], S=[["I · ISTOČNA KRIZA I NACIONALNA PITANJA", 0, 7], ["II · BALKANSKE DRŽAVE I PUT KA VELIKOM SUKOBU", 7, 18], ["III · PRVI SVETSKI RAT I NOVI BALKANSKI POREDAK", 18, 24], ["IV · BALKAN IZMEĐU DVA SVETSKA RATA", 24, 29], ["V · SILE OSOVINE I DRUGI SVETSKI RAT", 29, 33], ["VI · POSLERATNA PODELA I HLADNI RAT", 33, 39]], KEY="ibo_review_v2";
-const T0=new Date(2026,8,21,2,0,0).getTime(),T1=new Date(2026,8,21,7,30,0).getTime(),SL=(T1-T0)/Q.length;
+const T0=new Date(2026,8,21,2,0,0).getTime(),T1=new Date(2026,8,21,7,0,0).getTime(),T2=new Date(2026,8,21,7,30,0).getTime(),SL=(T1-T0)/Q.length;
+const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,"0");
 const hm=t=>{const d=new Date(t);return pad(d.getHours())+":"+pad(d.getMinutes())};
+const hmr=t=>hm(Math.round(t/60000)*60000);
+const hmss=t=>hm(t)+":"+pad(new Date(t).getSeconds());
 const hms=s=>{s=Math.max(0,Math.ceil(s));return pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60)};
 const mss=s=>{s=Math.max(0,Math.ceil(s));return pad(Math.floor(s/60))+":"+pad(s%60)};
-let state={done:{},red:{},redDone:{}};
+const fdur=s=>{s=Math.round(Math.abs(s));return s>=3600?hms(s):mss(s)};
+const fsgn=s=>(Math.round(s)<0?"−":"+")+fdur(s);
+const pS=i=>T0+i*SL,pE=i=>T0+(i+1)*SL;
+let state={done:{},red:{},redDone:{},start:{},end:{},auto:{}};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){}
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+const nDone=()=>Object.keys(state.done).filter(i=>state.done[i]).length;
+const redIds=()=>Object.keys(state.red).filter(i=>state.red[i]).map(Number).sort((a,b)=>a-b);
+
+// pitanje na kome trenutno radiš: poslednje pokrenuto a nezavršeno; ako nema, prvo nezavršeno
+function curQ(){
+ let c=null;
+ for(const k in state.start){const i=+k;if(!state.done[i]&&(c===null||state.start[i]>state.start[c]))c=i}
+ if(c!==null)return{i:c,run:true};
+ for(let i=0;i<Q.length;i++)if(!state.done[i])return{i,run:false};
+ return null;
+}
+// ako čekiraš "gotovo" a nisi pritisnula ▶, početak = kraj prethodnog pitanja (ili 02:00)
+function fbStart(now,i){
+ let b=null;
+ for(const k in state.end){if(+k!==+i&&state.end[k]<=now&&(b===null||state.end[k]>b))b=state.end[k]}
+ return b!==null?b:Math.min(now,T0);
+}
+
 function render(){
- const main=document.getElementById("main"); main.innerHTML="";
+ const main=$("main");main.innerHTML="";
  S.forEach((s,si)=>{
   const sec=document.createElement("section");sec.className="section";
   sec.innerHTML=`<div class="section-title">${s[0]}</div>`;
   for(let i=s[1];i<s[2];i++){
-   const r=document.createElement("div");r.className="row"+(state.done[i]?" done":"");r.dataset.i=i;
-   r.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><label class="q"><input class="check" type="checkbox" ${state.done[i]?"checked":""} data-d="${i}"> ${Q[i]}<span class="slot">${hm(Math.round(T0+i*SL))}–${hm(Math.round(T0+(i+1)*SL))}</span></label><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button>`;
+   const st=state.start[i],en=state.end[i],dn=!!state.done[i];
+   let t=`<span class="slot">Plan ${hmr(pS(i))}–${hmr(pE(i))}</span>`;
+   if(st)t+=`<span class="act">Počela ${hmss(st)}${state.auto[i]?" (auto)":""}</span>`;
+   if(en)t+=`<span class="act">Gotovo ${hmss(en)}</span>`;
+   if(st&&en){const d=(en-st)/1000,df=SL/1000-d;t+=`<span class="act">Potrošeno ${fdur(d)}</span><span class="${df>=0?"plus":"minus"}">${fsgn(df)}</span>`}
+   else if(st)t+=`<span class="live" data-live="${i}"></span>`;
+   const r=document.createElement("div");r.className="row"+(dn?" done":"");r.dataset.i=i;
+   r.innerHTML=`<div class="num">${pad(i+1)}</div><div class="qbody"><div class="q">${Q[i]}</div><div class="times">${t}</div></div><div class="ctl"><button class="startbtn ${st?"on":""}" data-s="${i}" ${dn?"disabled":""} aria-label="Počela sam pitanje ${i+1}" title="Počela sam"></button><input class="check" type="checkbox" ${dn?"checked":""} data-d="${i}" aria-label="Završila sam pitanje ${i+1}" title="Gotovo"><button class="flag ${state.red[i]?"on":""}" data-r="${i}" title="Crvena zona"></button></div>`;
    sec.appendChild(r)
   }
   main.appendChild(sec);
   if(si<S.length-1){const p=document.createElement("div");p.className="pause";p.textContent="· pauza ·";main.appendChild(p)}
  });
- document.querySelectorAll("[data-d]").forEach(x=>x.onchange=()=>{state.done[x.dataset.d]=x.checked;save();render()});
+ document.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>{
+  const i=x.dataset.s;if(state.done[i])return;
+  if(state.start[i]){delete state.start[i]}else{state.start[i]=Date.now()}
+  delete state.auto[i];save();render()});
+ document.querySelectorAll("[data-d]").forEach(x=>x.onchange=()=>{
+  const i=x.dataset.d,now=Date.now();
+  if(x.checked){state.done[i]=true;state.end[i]=now;if(!state.start[i]){state.start[i]=fbStart(now,i);state.auto[i]=true}}
+  else{delete state.done[i];delete state.end[i];if(state.auto[i]){delete state.start[i];delete state.auto[i]}}
+  save();render()});
  document.querySelectorAll("[data-r]").forEach(x=>x.onclick=()=>{let i=x.dataset.r;state.red[i]=!state.red[i];if(!state.red[i])delete state.redDone[i];save();render()});
- const red=document.getElementById("red");red.innerHTML="";
- const ids=Object.keys(state.red).filter(i=>state.red[i]).map(Number).sort((a,b)=>a-b);
+
+ // crvena zona: 07:00–07:30, vreme se deli na označena pitanja
+ const red=$("red");red.innerHTML="";
+ const ids=redIds(),per=ids.length?(T2-T1)/ids.length:0;
+ $("rzt").textContent="🚩 KRIZNE TAČKE · "+hm(T1)+"–"+hm(T2);
+ $("rzi").textContent=ids.length?"Označeno: "+ids.length+" · oko "+fdur(per/1000)+" po tački":"";
  if(!ids.length)red.innerHTML='<div class="empty">Nema označenih pitanja. Crvenom zastavicom označi ono što moraš ponovo.</div>';
- ids.forEach(i=>{const r=document.createElement("div");r.className="redrow"+(state.redDone[i]?" rdone":"");r.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><div class="q">${Q[i]}</div><input class="redcheck" type="checkbox" ${state.redDone[i]?"checked":""} data-rd="${i}">`;red.appendChild(r)});
+ ids.forEach((i,k)=>{const r=document.createElement("div");r.className="redrow"+(state.redDone[i]?" rdone":"");r.innerHTML=`<div class="num">${pad(i+1)}</div><div class="q">${Q[i]}<span class="slot">Plan ${hmr(T1+k*per)}–${hmr(T1+(k+1)*per)}</span></div><input class="redcheck" type="checkbox" ${state.redDone[i]?"checked":""} data-rd="${i}">`;red.appendChild(r)});
  document.querySelectorAll("[data-rd]").forEach(x=>x.onchange=()=>{state.redDone[x.dataset.rd]=x.checked;save();render()});
- const n=Object.keys(state.done).filter(i=>state.done[i]).length;
- document.getElementById("pt").textContent=`${n} / ${Q.length} završeno`;
- document.getElementById("pf").style.width=(n/Q.length*100)+"%";
- document.getElementById("rc").textContent=`🚩 ${ids.length} u Crvenoj zoni`;
+
+ const n=nDone();
+ $("pt").textContent=`${n} / ${Q.length} završeno`;
+ $("pf").style.width=(n/Q.length*100)+"%";
+ $("rc").textContent=`🚩 ${ids.length} u Crvenoj zoni`;
+
+ // stvarno potrošeno na urađena pitanja (samo ona koja imaju i početak i kraj)
+ let m=0,sum=0;
+ Object.keys(state.done).forEach(k=>{if(state.done[k]&&state.start[k]&&state.end[k]){m++;sum+=(state.end[k]-state.start[k])/1000}});
+ const plan=m*SL/1000,df=plan-sum;
+ $("stats").innerHTML=
+  `<div><div class="k">Stvarno potrošeno</div><div class="v">${m?fdur(sum):"—"}</div></div>`+
+  `<div><div class="k">Po planu za ta pitanja</div><div class="v">${m?fdur(plan):"—"}</div></div>`+
+  `<div><div class="k">Razlika</div><div class="v ${m?(df>=0?"plus":"minus"):""}">${m?(df>=0?"Plus ":"Minus ")+fdur(df):"—"}</div></div>`;
  tick();
 }
-document.getElementById("reset").onclick=()=>{if(confirm("Resetovati sav IBO napredak?")){state={done:{},red:{},redDone:{}};save();render()}};
+$("reset").onclick=()=>{if(confirm("Resetovati sav IBO napredak?")){state={done:{},red:{},redDone:{},start:{},end:{},auto:{}};save();render()}};
+
 function tick(){
- const now=Date.now(),$=id=>document.getElementById(id);
- const n=Object.keys(state.done).filter(i=>state.done[i]).length;
- let idx;
- if(now<T0){idx=-1;
-  $("cl").textContent="Početak za";$("cb").textContent=hms((T0-now)/1000);
-  $("cs1").textContent="Ukupno";$("cs2").textContent=hms((T1-T0)/1000);
-  $("cp").textContent=Q.length+" pitanja · "+mss(SL/1000).replace(/^0/,"")+" po pitanju";
-  $("cf").style.width="0%";$("clock").classList.remove("warn");
- }else if(now>=T1){idx=Q.length;
-  $("cl").textContent="Vreme isteklo";$("cb").textContent="00:00";
-  $("cs1").textContent="Urađeno";$("cs2").textContent=n+" / "+Q.length;
-  $("cp").textContent="";$("cf").style.width="100%";$("clock").classList.remove("warn");
- }else{idx=Math.floor((now-T0)/SL);
-  const rem=(T0+(idx+1)*SL-now)/1000;
-  $("cl").textContent="Pitanje "+pad(idx+1)+" / "+Q.length;$("cb").textContent=mss(rem);
+ const now=Date.now(),n=nDone(),clk=$("clock"),pc=$("cp"),cur=curQ();
+ const ph=now<T0?0:now<T1?1:now<T2?2:3;
+ clk.classList.remove("warn");clk.classList.toggle("redmode",ph===2);pc.className="pace";
+ if(ph===0){
+  $("cl").textContent="Početak u "+hm(T0)+" · za";$("cb").textContent=hms((T0-now)/1000);
+  $("cs1").textContent="Učenje do "+hm(T1);$("cs2").textContent=hms((T1-T0)/1000);
+  pc.textContent=Q.length+" pitanja · "+fdur(SL/1000)+" po pitanju";$("cf").style.width="0%";
+ }else if(ph===1){
+  let credit=0;
+  if(cur&&cur.run){
+   const el=now-state.start[cur.i],rem=(SL-el)/1000;credit=Math.min(el,SL);
+   $("cl").textContent="Pitanje "+pad(cur.i+1)+" / "+Q.length+" · u toku";
+   $("cb").textContent=(rem<0?"−":"")+mss(Math.abs(rem));
+   $("cf").style.width=Math.min(100,el/SL*100)+"%";
+   clk.classList.toggle("warn",rem<60);
+  }else if(cur){
+   $("cl").textContent="Pitanje "+pad(cur.i+1)+" / "+Q.length+" · pritisni ▶ kad kreneš";
+   $("cb").textContent=mss(SL/1000);$("cf").style.width="0%";
+  }else{
+   $("cl").textContent="Sva pitanja urađena";$("cb").textContent=n+" / "+Q.length;$("cf").style.width="100%";
+  }
   $("cs1").textContent="Do "+hm(T1);$("cs2").textContent=hms((T1-now)/1000);
-  const d=n-idx;$("cp").textContent=d>0?"Ispred +"+d:d<0?"Kasniš "+(-d):"Na planu";
-  $("cf").style.width=(100-rem/(SL/1000)*100)+"%";$("clock").classList.toggle("warn",rem<60);
+  // bilans: koliko bi trebalo da je prošlo za urađeno (+ delimičan kredit za pitanje u toku) minus koliko je stvarno prošlo
+  const bal=(n*SL+credit-(now-T0))/1000;
+  pc.textContent=(bal>=0?"U plusu ":"U minusu ")+fdur(bal)+" prema planu";pc.classList.add(bal>=0?"plus":"minus");
+ }else if(ph===2){
+  const ids=redIds(),rd=ids.filter(i=>state.redDone[i]).length,rem=(T2-now)/1000;
+  $("cl").textContent="Crvena zona · do "+hm(T2);$("cb").textContent=mss(rem);
+  $("cs1").textContent="Urađeno";$("cs2").textContent=n+" / "+Q.length;
+  pc.textContent=ids.length?"🚩 "+rd+" / "+ids.length+" ponovljeno":"Nema označenih 🚩 pitanja";
+  $("cf").style.width=((now-T1)/(T2-T1)*100)+"%";clk.classList.toggle("warn",rem<60);
+ }else{
+  $("cl").textContent="Vreme je · idemo";$("cb").textContent="00:00";
+  $("cs1").textContent="Urađeno";$("cs2").textContent=n+" / "+Q.length;
+  pc.textContent="Ispit u 09:00";$("cf").style.width="100%";
  }
- document.querySelectorAll(".row").forEach(r=>{const i=+r.dataset.i;r.classList.toggle("now",i===idx);r.classList.toggle("late",i<idx&&!state.done[i])});
+ document.querySelectorAll(".row").forEach(r=>{const i=+r.dataset.i;
+  r.classList.toggle("now",ph===1&&!!cur&&cur.i===i);
+  r.classList.toggle("late",ph>=1&&!state.done[i]&&now>pE(i));});
+ document.querySelectorAll("[data-live]").forEach(x=>{
+  const i=x.dataset.live,el=(now-state.start[i])/1000,d=SL/1000-el;
+  x.textContent="U toku "+fdur(el)+" · "+fsgn(d);
+  x.classList.toggle("plus",d>=0);x.classList.toggle("minus",d<0)});
 }
 render();setInterval(tick,1000);
 </script></body></html>
